@@ -28,7 +28,7 @@
   (let [id (new-player-serial)]
     (prn message)
     (send-off world assoc id [1 1])
-    (siphon (map* #(process-message id %) ch) broadcast-channel)
+    (siphon (map* #(str (process-message id %)) ch) broadcast-channel)
     (siphon broadcast-channel ch)))
 
 (defn junehandler [ch info]
