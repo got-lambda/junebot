@@ -1,5 +1,5 @@
 (ns junebot.server)
-(use 'lamina.core 'aleph.http)
+(use 'lamina.core 'aleph.tcp 'aleph.http 'gloss.core)
 
 (def world (agent {}))
 
@@ -16,14 +16,17 @@
 
 (defn process-message [id message]
   (let [move (get directions message)]
-    (deref (send-off world
-                     (fn [state]
-                       (update-in state [id] #(vec (map + % move))))))))
+    (prn message)
+    (deref
+     (send-off world
+               (fn [state]
+                 (update-in state [id] #(vec (map + % move))))))))
 
 (def broadcast-channel (channel))
 
 (defn new-client [ch message]
   (let [id (new-player-serial)]
+    (prn message)
     (send-off world assoc id [1 1])
     (siphon (map* #(process-message id %) ch) broadcast-channel)
     (siphon broadcast-channel ch)))
@@ -32,4 +35,4 @@
   (receive ch #(new-client ch %)))
 
 (defn -main []
-  (start-http-server junehandler {:port 5000}))
+  (start-tcp-server junehandler {:port 5000 :frame (string :utf-8 :delimiters ["\r\n"])}))

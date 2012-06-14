@@ -1,7 +1,7 @@
 (ns junebot.test.server
   (:use [junebot.server])
   (:use [clojure.test])
-  (:use [aleph.http])
+  (:use [aleph.tcp])
   (:use [lamina.core]))
 
 ;; adding a user to an empty world adds a player to the world
