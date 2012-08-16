@@ -1,7 +1,7 @@
 (ns junebot.server)
 (use 'lamina.core 'aleph.object 'gloss.core)
 
-(def world (agent {}))
+(def world (atom {}))
 
 (def player-serial (atom 0))
 
@@ -17,18 +17,15 @@
 (defn process-message [id message]
   (let [move (get directions message)]
     (prn message)
-    (deref
-     (send-off world
-               (fn [state]
-                 (update-in state [id] #(vec (map + % move))))))))
+    (swap! world update-in [id :coord] #(mapv + % move))))
 
 (def broadcast-channel (channel))
 
 (defn new-client [ch message]
   (let [id (new-player-serial)]
     (prn message)
-    (send-off world assoc id [1 1])
-    (siphon (map* #(str (process-message id %)) ch) broadcast-channel)
+    (swap! world assoc id {:name (str "player " id) :coord [1 1]})
+    (siphon (map* #(process-message id %) ch) broadcast-channel)
     (siphon broadcast-channel ch)))
 
 (defn junehandler [ch info]

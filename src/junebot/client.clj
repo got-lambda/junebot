@@ -10,12 +10,7 @@
 ;;;(defn -main []
 ;;;  (tcp-client {:host "localhost",:port 5000,:frame (string :utf-8 :delimiters ["\r\n"])}))
 
-(def world (atom
-	    [{ :name "player1" :coord [2 5] }
-	     { :name "player2" :coord [10 10] }
-	     { :name "player3" :coord [30 3] }]))
-
-(def my-name "player2")
+(def world (atom {}))
 
 (defn setup []
   (frame-rate 5))
@@ -36,7 +31,7 @@
 (defn draw []
   (background 220 230 240)
   (let [size 20]
-    (doseq [player @world]
+    (doseq [[key player] @world]
       (let [[r g b] (get-color-from-name (:name player))]
 	(fill r g b))
       (let [[x y] (:coord player)]
@@ -47,6 +42,7 @@
   (println "moving " dir))
 
 (defn change-world [new-world]
+  (prn new-world)
   (reset! world new-world))
 
 (defn key-pressed [client]
@@ -57,6 +53,7 @@
 
 (defn -main []
   (let [client (object-client {:host "localhost", :port 5000})]
+    (map* change-world @client)
     (defsketch junebot
       :title "Junebot"
       :setup setup
