@@ -32,16 +32,16 @@
 (defn draw []
   (background 220 230 240)
   (let [size 20]
-    (doseq [[key player] @world]
-      (let [[r g b] (get-color-from-name (:name player))
-            [x y] (:coord player)
+    (doseq [object @world]
+      (let [[r g b] (get-color-from-name (:name object))
+            [x y] (:coord object)
             screen-x (* size x)
             screen-y (* size y)]
          (fill r g b)
 	       (rect screen-x screen-y size size)
          (fill 0 0 0)
          (text-align :center)
-         (text (:name player) (+ screen-x (/ size 2)) (- screen-y 5))))))
+         (text (:name object) (+ screen-x (/ size 2)) (- screen-y 5))))))
 
 (defn move [client dir]
   (enqueue @client dir)

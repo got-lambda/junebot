@@ -1,7 +1,17 @@
 (ns junebot.server)
 (use 'lamina.core 'aleph.object 'gloss.core)
 
-(def world (atom {}))
+(def world
+  (remove nil?
+          (for [x (range 50) y (range 30)]
+            (when (or (= x 0)
+                      (= x 49)
+                      (= y 0)
+                      (= y 29)
+                      (= 0 (rand-int 5)))
+              {:name "wall" :coord [x y]}))))
+
+(def players (atom {}))
 
 (def player-serial (atom 0))
 
@@ -15,9 +25,7 @@
   {"N" [0 -1] "S" [0 1] "E" [1 0] "W" [-1 0]})
 
 (defn positions-taken [state]
-  (let [positions (set (map :coord (vals state)))]
-    (prn (str "Positions taken: " positions))
-    positions))
+  (set (map :coord (concat world (vals state)))))
 
 (defn free-position? [state pos]
   (not (get (positions-taken state) pos)))
@@ -31,14 +39,15 @@
 (defn process-message [id message]
   (let [movement (get directions message)]
     (prn message)
-    (swap! world move id movement)))
+    (concat world
+            (vals (swap! players move id movement)))))
 
 (def broadcast-channel (channel))
 
 (defn new-client [ch message]
   (let [id (new-player-serial)]
     (prn message)
-    (swap! world assoc id {:name (str "player " id) :coord [1 1]})
+    (swap! players assoc id {:name (str "player " id) :coord [1 1]})
     (siphon (map* #(process-message id %) ch) broadcast-channel)
     (siphon broadcast-channel ch)))
 
