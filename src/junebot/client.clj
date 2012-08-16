@@ -6,6 +6,7 @@
 (use 'lamina.core 'aleph.tcp 'gloss.core)
 (import java.util.zip.CRC32)
 (import java.awt.event.KeyEvent)
+(import 'javax.swing.JOptionPane)
 
 ;;;(defn -main []
 ;;;  (tcp-client {:host "localhost",:port 5000,:frame (string :utf-8 :delimiters ["\r\n"])}))
@@ -50,11 +51,16 @@
   (prn new-world)
   (reset! world new-world))
 
+(defn show-name-input-box []
+  (let [name (JOptionPane/showInputDialog nil "Enter your name:" "name" 1)]
+    (println (str "Your name will be " name))))
+
 (defn key-pressed [client]
   (cond (= (key-code) java.awt.event.KeyEvent/VK_RIGHT) (move client "E")
 	(= (key-code) java.awt.event.KeyEvent/VK_LEFT) (move client "W")
 	(= (key-code) java.awt.event.KeyEvent/VK_UP) (move client "N")
-	(= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")))
+	(= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")
+  (= (key-code) java.awt.event.KeyEvent/VK_N) (show-name-input-box)))
 
 (defn -main []
   (let [client (object-client {:host "localhost", :port 5000})]
