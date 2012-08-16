@@ -43,7 +43,7 @@
 	    (rect (* size x) (* size y) size size)))))
 
 (defn move [client dir]
-  (enqueue client dir)
+  (enqueue @client dir)
   (println "moving " dir))
 
 (defn change-world [new-world]
@@ -63,5 +63,3 @@
       :draw draw
       :key-pressed (fn [] (key-pressed client))
       :size [1000 600])))
-
-
