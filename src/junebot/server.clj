@@ -9,7 +9,7 @@
                       (= y 0)
                       (= y 29)
                       (= 0 (rand-int 5)))
-              {:name "wall" :coord [x y]}))))
+              {:type :wall, :name "wall", :coord [x y]}))))
 
 (def players (atom {}))
 
@@ -47,7 +47,7 @@
 (defn new-client [ch message]
   (let [id (new-player-serial)]
     (prn message)
-    (swap! players assoc id {:name (str "player " id) :coord [1 1]})
+    (swap! players assoc id {:type :client, :name (str "player " id) :coord [1 1]})
     (siphon (map* #(process-message id %) ch) broadcast-channel)
     (siphon broadcast-channel ch)))
 

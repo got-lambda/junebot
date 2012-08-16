@@ -37,11 +37,15 @@
             [x y] (:coord object)
             screen-x (* size x)
             screen-y (* size y)]
-         (fill r g b)
-	       (rect screen-x screen-y size size)
-         (fill 0 0 0)
-         (text-align :center)
-         (text (:name object) (+ screen-x (/ size 2)) (- screen-y 5))))))
+        (if (= :wall (:type object))
+          (no-stroke)
+          (stroke 1))
+        (fill r g b)
+        (rect screen-x screen-y size size)
+        (fill 0 0 0)
+        (text-align :center)
+        (when (= :client (:type object))
+          (text (:name object) (+ screen-x (/ size 2)) (- screen-y 5)))))))
 
 (defn move [client dir]
   (enqueue @client dir)
@@ -60,7 +64,7 @@
 	(= (key-code) java.awt.event.KeyEvent/VK_LEFT) (move client "W")
 	(= (key-code) java.awt.event.KeyEvent/VK_UP) (move client "N")
 	(= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")
-  (= (key-code) java.awt.event.KeyEvent/VK_N) (show-name-input-box)))
+        (= (key-code) java.awt.event.KeyEvent/VK_N) (show-name-input-box)))
 
 (defn -main []
   (let [client (object-client {:host "localhost", :port 5000})]
