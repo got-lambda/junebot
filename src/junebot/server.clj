@@ -1,5 +1,5 @@
 (ns junebot.server)
-(use 'lamina.core 'aleph.tcp 'aleph.http 'gloss.core)
+(use 'lamina.core 'aleph.object 'gloss.core)
 
 (def world (agent {}))
 
@@ -35,4 +35,4 @@
   (receive ch #(new-client ch %)))
 
 (defn -main []
-  (start-tcp-server junehandler {:port 5000 :frame (string :utf-8 :delimiters ["\r\n"])}))
+  (start-object-server junehandler {:port 5000}))

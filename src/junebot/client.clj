@@ -1,6 +1,7 @@
 (ns junebot.client
   (:use quil.core)
-  (:gen-class))
+  (:gen-class)
+  (:use aleph.object))
 
 (use 'lamina.core 'aleph.tcp 'gloss.core)
 (import java.util.zip.CRC32)
@@ -41,25 +42,26 @@
       (let [[x y] (:coord player)]
 	    (rect (* size x) (* size y) size size)))))
 
-(defn move [dir]
+(defn move [client dir]
+  (enqueue client dir)
   (println "moving " dir))
 
 (defn change-world [new-world]
   (reset! world new-world))
 
-(defn key-pressed []
-  (cond (= (key-code) java.awt.event.KeyEvent/VK_RIGHT) (move :r)
-	(= (key-code) java.awt.event.KeyEvent/VK_LEFT) (move :l)
-	(= (key-code) java.awt.event.KeyEvent/VK_UP) (move :n)
-	(= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move :s)))
+(defn key-pressed [client]
+  (cond (= (key-code) java.awt.event.KeyEvent/VK_RIGHT) (move client "E")
+	(= (key-code) java.awt.event.KeyEvent/VK_LEFT) (move client "W")
+	(= (key-code) java.awt.event.KeyEvent/VK_UP) (move client "N")
+	(= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")))
 
 (defn -main []
-  (tcp-client {:host "localhost",:port 5000,:frame (string :utf-8 :delimiters ["\r\n"])})
-  (defsketch junebot
-	:title "Junebot"
-	:setup setup
-	:draw draw
-        :key-pressed key-pressed
-	:size [1000 600]))
+  (let [client (object-client {:host "localhost", :port 5000})]
+    (defsketch junebot
+      :title "Junebot"
+      :setup setup
+      :draw draw
+      :key-pressed (fn [] (key-pressed client))
+      :size [1000 600])))
 
 
