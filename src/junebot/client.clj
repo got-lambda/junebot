@@ -13,7 +13,7 @@
 (def world (atom {}))
 
 (defn setup []
-  (frame-rate 5))
+  (frame-rate 30))
 
 (defn rects []
   (for [x (range 0 10) y (range 0 10)]
@@ -32,10 +32,15 @@
   (background 220 230 240)
   (let [size 20]
     (doseq [[key player] @world]
-      (let [[r g b] (get-color-from-name (:name player))]
-	(fill r g b))
-      (let [[x y] (:coord player)]
-	    (rect (* size x) (* size y) size size)))))
+      (let [[r g b] (get-color-from-name (:name player))
+            [x y] (:coord player)
+            screen-x (* size x)
+            screen-y (* size y)]
+         (fill r g b)
+	       (rect screen-x screen-y size size)
+         (fill 0 0 0)
+         (text-align :center)
+         (text (:name player) (+ screen-x (/ size 2)) (- screen-y 5))))))
 
 (defn move [client dir]
   (enqueue @client dir)
