@@ -11,3 +11,16 @@ FIXME: write
 Copyright (C) 2012 FIXME
 
 Distributed under the Eclipse Public License, the same as Clojure.
+
+## TODO
+
+### Server Side
+- Handle disconnects
+- Handle collisions
+- Add walls and exits
+- Do not send the whole world, just neighbourhood
+
+### Client
+- Interpolate moves
+- Remember the walls
+- Center on the player

@@ -14,10 +14,24 @@
 (def directions
   {"N" [0 -1] "S" [0 1] "E" [1 0] "W" [-1 0]})
 
+(defn positions-taken [state]
+  (let [positions (set (map :coord (vals state)))]
+    (prn (str "Positions taken: " positions))
+    positions))
+
+(defn free-position? [state pos]
+  (not (get (positions-taken state) pos)))
+
+(defn move [state id movement]
+  (let [new-pos (mapv + (get-in state [id :coord]) movement)]
+    (if (free-position? state new-pos)
+      (assoc-in state [id :coord] new-pos)
+      state)))
+
 (defn process-message [id message]
-  (let [move (get directions message)]
+  (let [movement (get directions message)]
     (prn message)
-    (swap! world update-in [id :coord] #(mapv + % move))))
+    (swap! world move id movement)))
 
 (def broadcast-channel (channel))
 
