@@ -1,10 +1,16 @@
 # junebot
 
-FIXME: write description
+An online game written in clojure. Requires leiningen (https://github.com/technomancy/leiningen) and foreman (https://github.com/ddollar/foreman)
 
 ## Usage
 
-FIXME: write
+To start the server:
+
+    foreman start server
+
+To start a client:
+
+    foreman start client
 
 ## License
 
