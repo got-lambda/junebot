@@ -21,11 +21,13 @@ Distributed under the Eclipse Public License, the same as Clojure.
 ## TODO
 
 ### Server Side
+- Fix tests
 - Handle disconnects
 - Do not send the whole world, just neighbourhood
 - Better random walls
 
 ### Client
+- Write test
 - Interpolate moves
 - Remember the walls
 - Center on the player
