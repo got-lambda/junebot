@@ -13,6 +13,8 @@
 
 (def players (atom {}))
 
+(def shots (atom []))
+
 (def player-serial (atom 0))
 
 (defn number-of-players []
@@ -30,10 +32,16 @@
 (defn free-position? [state pos]
   (not (get (positions-taken state) pos)))
 
+(defn calculate-position
+  [state id movement]
+  (mapv + (get-in state [id :coord]) movement))
+
 (defn move [state id movement]
-  (let [new-pos (mapv + (get-in state [id :coord]) movement)]
+  (let [new-pos (calculate-position state id movement)]
     (if (free-position? state new-pos)
-      (assoc-in state [id :coord] new-pos)
+      (-> state
+        (assoc-in [id :coord] new-pos)
+        (assoc-in [id :direction] movement))
       state)))
 
 (defmulti process-message
@@ -41,10 +49,12 @@
     (prn id message-type)
     message-type))
 
-(defmethod process-message :name
-  [id [_ player-name]]
-  (swap! players assoc-in [id :player-name] player-name)
-  (concat world @players))
+(defmethod process-message :fire
+  [id [_]]
+  (let [position (calculate-position @players id (get-in @players [id :direction]))] 
+    (if (free-position? @players position)
+      (swap! shots conj {:position position}))
+    [:update-shots @shots]))
 
 (defmethod process-message :move
   [id [_ message]]

@@ -11,7 +11,8 @@
 ;;;(defn -main []
 ;;;  (tcp-client {:host "localhost",:port 5000,:frame (string :utf-8 :delimiters ["\r\n"])}))
 
-(def world (atom {}))
+(def world (atom []))
+(def shots (atom []))
 
 (defn setup []
   (frame-rate 30))
@@ -47,31 +48,48 @@
         (fill 0 0 0)
         (text-align :center)
         (when (= :client (:type object))
-          (text (or (:name object) waiting-message) (+ screen-x (/ size 2)) (- screen-y 5)))))))
+          (text (or (:name object) waiting-message) (+ screen-x (/ size 2)) (- screen-y 5)))))
+    (prn @shots)
+    (doseq [{[x y] :position} @shots]
+      (fill 255 0 0)
+      (rect (+ (* size x) (/ size 4)) (+ (* size y) (/ size 4)) (/ size 2) (/ size 2)))))
 
 (defn move [client dir]
   (enqueue @client [:move dir])
   (println "moving " dir))
 
 (defmulti change-world (fn [data] (first data)))
+
 (defmethod change-world :new-world [[_ new-world]]
   (reset! world new-world))
+
 (defmethod change-world :update-players [data]
   (let [world-without-players
         (remove (fn [object] (= :client (:type object))) @world)
         player-data (rest data)]
     (reset! world (concat world-without-players player-data))))
 
+(defmethod change-world :update-shots 
+  [[_ new-shots]]
+  (reset! shots new-shots))
+
 (defn show-name-input-box []
   (let [name (JOptionPane/showInputDialog nil "Enter your name:" "name" 1)]
     (println (str "Your name will be " name))))
 
+(defn fire 
+  [client]
+  (enqueue @client [:fire])
+  )
+
 (defn key-pressed [client]
-  (cond (= (key-code) java.awt.event.KeyEvent/VK_RIGHT) (move client "E")
-	(= (key-code) java.awt.event.KeyEvent/VK_LEFT) (move client "W")
-	(= (key-code) java.awt.event.KeyEvent/VK_UP) (move client "N")
-	(= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")
-        (= (key-code) java.awt.event.KeyEvent/VK_N) (show-name-input-box)))
+  (cond 
+    (= (key-code) java.awt.event.KeyEvent/VK_RIGHT) (move client "E")
+    (= (key-code) java.awt.event.KeyEvent/VK_LEFT) (move client "W")
+    (= (key-code) java.awt.event.KeyEvent/VK_UP) (move client "N")
+    (= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")
+    (= (key-code) java.awt.event.KeyEvent/VK_SPACE) (fire client)
+    (= (key-code) java.awt.event.KeyEvent/VK_N) (show-name-input-box)))
 
 (defn -main
   [& [ip, player-name]]
