@@ -36,7 +36,15 @@
       (assoc-in state [id :coord] new-pos)
       state)))
 
-(defn process-message [id message]
+(defmulti process-message (fn [id [message-type]] message-type))
+
+(defmethod process-message :name
+  [id [_ player-name]]
+  (swap! players assoc-in [id :player-name] player-name)
+  (concat world @players))
+
+(defmethod process-message :move 
+  [id message]
   (let [movement (get directions message)]
     (prn message)
     (concat world
@@ -51,7 +59,7 @@
   (let [id (new-player-serial)]
     (prn message)
     (on-closed ch (fn [] (disconnect-client id)))
-    (swap! players assoc id {:type :client, :name (str "player " id) :coord [1 1]})
+    (swap! players assoc id {:type :client :coord [1 1]})
     (siphon (map* #(process-message id %) ch) broadcast-channel)
     (siphon broadcast-channel ch)))
 

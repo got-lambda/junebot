@@ -48,7 +48,7 @@
           (text (:name object) (+ screen-x (/ size 2)) (- screen-y 5)))))))
 
 (defn move [client dir]
-  (enqueue @client dir)
+  (enqueue @client [:move dir])
   (println "moving " dir))
 
 (defn change-world [new-world]
@@ -66,9 +66,11 @@
 	(= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")
         (= (key-code) java.awt.event.KeyEvent/VK_N) (show-name-input-box)))
 
-(defn -main []
-  (let [client (object-client {:host "localhost", :port 5000})]
+(defn -main 
+  [& [ip, player-name]]
+  (let [client (object-client {:host ip, :port 5000})]
     (map* change-world @client)
+    (enqueue @client [:name (or player-name (JOptionPane/showMessageDialog nil "Please enter yourname"))])
     (defsketch junebot
       :title "Junebot"
       :setup setup
