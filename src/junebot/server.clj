@@ -36,16 +36,21 @@
       (assoc-in state [id :coord] new-pos)
       state)))
 
-(defmulti process-message 
-  (fn [id [message-type]] 
+(defmulti process-message
+  (fn [id [message-type]]
     (prn id message-type)
     message-type))
 
-(defmethod process-message :move 
+(defmethod process-message :name
+  [id [_ player-name]]
+  (swap! players assoc-in [id :player-name] player-name)
+  (concat world @players))
+
+(defmethod process-message :move
   [id [_ message]]
   (let [movement (get directions message)]
-    (concat world
-            (vals (swap! players move id movement)))))
+    (prn message)
+    (cons :update-players (vals (swap! players move id movement)))))
 
 (def broadcast-channel (channel))
 
@@ -57,7 +62,8 @@
     (on-closed ch (fn [] (disconnect-client id)))
     (swap! players assoc id {:type :client :name (message :name) :coord [1 1]})
     (siphon (map* #(process-message id %) ch) broadcast-channel)
-    (siphon broadcast-channel ch)))
+    (siphon broadcast-channel ch)
+    (enqueue ch [:new-world world])))
 
 (defn junehandler [ch info]
   (receive ch #(new-client ch %)))
