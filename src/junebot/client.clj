@@ -20,9 +20,11 @@
   (for [x (range 0 10) y (range 0 10)]
     [x y]))
 
+(def waiting-message "waiting..")
+
 (defn get-color-from-name [name]
      (def crc (new java.util.zip.CRC32))
-     (.update crc (.getBytes name))
+     (.update crc (.getBytes (or name waiting-message)))
      (let [n (.getValue crc)
 	   r (mod (* 97 n) 255)
 	   g (mod (* 133 n) 255)
@@ -45,7 +47,7 @@
         (fill 0 0 0)
         (text-align :center)
         (when (= :client (:type object))
-          (text (:name object) (+ screen-x (/ size 2)) (- screen-y 5)))))))
+          (text (or (:name object) waiting-message) (+ screen-x (/ size 2)) (- screen-y 5)))))))
 
 (defn move [client dir]
   (enqueue @client [:move dir])
@@ -69,11 +71,11 @@
 (defn -main 
   [& [ip, player-name]]
   (let [client (object-client {:host ip, :port 5000})]
-    (map* change-world @client)
-    (enqueue @client [:name (or player-name (JOptionPane/showMessageDialog nil "Please enter yourname"))])
     (defsketch junebot
       :title "Junebot"
       :setup setup
       :draw draw
       :key-pressed (fn [] (key-pressed client))
-      :size [1000 600])))
+      :size [1000 600])
+    (enqueue @client [:name (or player-name (JOptionPane/showMessageDialog nil "Please enter yourname"))])
+    (map* change-world @client)))
