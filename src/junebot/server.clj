@@ -44,9 +44,13 @@
 
 (def broadcast-channel (channel))
 
+(defn disconnect-client [id]
+  (swap! players dissoc id))
+
 (defn new-client [ch message]
   (let [id (new-player-serial)]
     (prn message)
+    (on-closed ch (fn [] (disconnect-client id)))
     (swap! players assoc id {:type :client, :name (str "player " id) :coord [1 1]})
     (siphon (map* #(process-message id %) ch) broadcast-channel)
     (siphon broadcast-channel ch)))

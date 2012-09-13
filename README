@@ -22,7 +22,6 @@ Distributed under the Eclipse Public License, the same as Clojure.
 
 ### Server Side
 - Fix tests
-- Handle disconnects
 - Do not send the whole world, just neighbourhood
 - Better random walls
 
