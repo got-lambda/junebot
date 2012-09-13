@@ -51,9 +51,14 @@
   (enqueue @client dir)
   (println "moving " dir))
 
-(defn change-world [new-world]
-  (prn new-world)
+(defmulti change-world (fn [data] (first data)))
+(defmethod change-world :new-world [[_ new-world]]
   (reset! world new-world))
+(defmethod change-world :update-players [data]
+  (let [world-without-players
+        (remove (fn [object] (= :client (:type object))) @world)
+        player-data (rest data)]
+    (reset! world (concat world-without-players player-data))))
 
 (defn show-name-input-box []
   (let [name (JOptionPane/showInputDialog nil "Enter your name:" "name" 1)]
