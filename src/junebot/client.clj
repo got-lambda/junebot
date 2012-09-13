@@ -70,7 +70,7 @@
 
 (defn -main 
   [& [ip, player-name]]
-  (let [client (object-client {:host ip, :port 5000})]
+  (let [client (object-client {:host (or ip "localhost"), :port 5000})]
     (defsketch junebot
       :title "Junebot"
       :setup setup
