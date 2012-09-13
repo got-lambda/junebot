@@ -77,5 +77,5 @@
       :draw draw
       :key-pressed (fn [] (key-pressed client))
       :size [1000 600])
-    (enqueue @client [:name (or player-name (JOptionPane/showMessageDialog nil "Please enter yourname"))])
+    (enqueue @client {:name (or player-name (JOptionPane/showMessageDialog nil "Please enter yourname"))})
     (map* change-world @client)))
