@@ -49,7 +49,6 @@
         (text-align :center)
         (when (= :client (:type object))
           (text (or (:name object) waiting-message) (+ screen-x (/ size 2)) (- screen-y 5)))))
-    (prn @shots)
     (doseq [{[x y] :position} @shots]
       (fill 255 0 0)
       (rect (+ (* size x) (/ size 4)) (+ (* size y) (/ size 4)) (/ size 2) (/ size 2)))))
