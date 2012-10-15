@@ -1,41 +1,33 @@
 (ns junebot.client
-  (:use quil.core)
-  (:gen-class)
-  (:use aleph.object))
-
-(use 'lamina.core 'aleph.tcp 'gloss.core)
-(import java.util.zip.CRC32)
-(import java.awt.event.KeyEvent)
-(import 'javax.swing.JOptionPane)
-
-;;;(defn -main []
-;;;  (tcp-client {:host "localhost",:port 5000,:frame (string :utf-8 :delimiters ["\r\n"])}))
+  (:use quil.core aleph.object lamina.core aleph.tcp gloss.core)
+  (:import [java.util.zip CRC32]
+           [java.awt.event KeyEvent]
+           [javax.swing JOptionPane])
+  (:gen-class))
 
 (def world (atom []))
 (def shots (atom []))
 
 (defn setup []
+  (text-align :center)
   (frame-rate 30))
-
-(defn rects []
-  (for [x (range 0 10) y (range 0 10)]
-    [x y]))
 
 (def waiting-message "waiting..")
 
 (defn get-color-from-name [name]
-     (def crc (new java.util.zip.CRC32))
-     (.update crc (.getBytes (or name waiting-message)))
-     (let [n (.getValue crc)
-	   r (mod (* 97 n) 255)
-	   g (mod (* 133 n) 255)
-	   b (mod (* 451 n) 255)]
-       [r g b]))
+  (def crc (new CRC32))
+  (.update crc (.getBytes (or name waiting-message)))
+  (let [n (.getValue crc)
+        r (mod (* 97 n) 255)
+        g (mod (* 133 n) 255)
+        b (mod (* 451 n) 255)]
+    [r g b]))
 
 (defn draw []
   (background 220 230 240)
   (let [size 20]
     (doseq [object @world]
+      (prn object)
       (let [[r g b] (get-color-from-name (:name object))
             [x y] (:coord object)
             screen-x (* size x)
@@ -46,7 +38,6 @@
         (fill r g b)
         (rect screen-x screen-y size size)
         (fill 0 0 0)
-        (text-align :center)
         (when (= :client (:type object))
           (text (or (:name object) waiting-message) (+ screen-x (/ size 2)) (- screen-y 5)))))
     (doseq [{[x y] :position} @shots]
@@ -57,38 +48,34 @@
   (enqueue @client [:move dir])
   (println "moving " dir))
 
-(defmulti change-world (fn [data] (first data)))
+(defmulti change-world first)
 
-(defmethod change-world :new-world [[_ new-world]]
+(defmethod change-world :new-world
+  [[_ new-world]]
   (reset! world new-world))
 
-(defmethod change-world :update-players [data]
+(defmethod change-world :update-players
+  [[_ & new-players]]
   (let [world-without-players
         (remove (fn [object] (= :client (:type object))) @world)
-        player-data (rest data)]
+        player-data new-players]
     (reset! world (concat world-without-players player-data))))
 
-(defmethod change-world :update-shots 
+(defmethod change-world :update-shots
   [[_ new-shots]]
   (reset! shots new-shots))
 
-(defn show-name-input-box []
-  (let [name (JOptionPane/showInputDialog nil "Enter your name:" "name" 1)]
-    (println (str "Your name will be " name))))
-
-(defn fire 
+(defn fire
   [client]
-  (enqueue @client [:fire])
-  )
+  (enqueue @client [:fire]))
 
 (defn key-pressed [client]
-  (cond 
+  (cond
     (= (key-code) java.awt.event.KeyEvent/VK_RIGHT) (move client "E")
     (= (key-code) java.awt.event.KeyEvent/VK_LEFT) (move client "W")
     (= (key-code) java.awt.event.KeyEvent/VK_UP) (move client "N")
     (= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")
-    (= (key-code) java.awt.event.KeyEvent/VK_SPACE) (fire client)
-    (= (key-code) java.awt.event.KeyEvent/VK_N) (show-name-input-box)))
+    (= (key-code) java.awt.event.KeyEvent/VK_SPACE) (fire client)))
 
 (defn -main
   [& [ip, player-name]]
