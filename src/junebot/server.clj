@@ -1,5 +1,6 @@
 (ns junebot.server)
 (use 'lamina.core 'aleph.object 'gloss.core)
+(import [java.util TimerTask Timer])
 
 (defn init-walls []
   (for [x (range 50)
@@ -39,16 +40,18 @@
     message-type))
 
 (defn add-shot
-  [{:keys [walls players shots] :as state} position]
+  [{:keys [walls players shots] :as state} position direction]
   (if (free-position? (concat walls (vals players)) position)
-    (assoc state :shots (conj shots {:position position}))
+    (assoc state :shots (conj shots {:position  position,
+                                     :direction direction}))
     state))
 
 (defmethod process-message :fire
   [{:keys [players] :as state} id _]
   (let [players (:players state)
-        position (calculate-position (players id) (get-in players [id :direction]))
-        new-state (add-shot state position)]
+        direction (get-in players [id :direction])
+        position (calculate-position (players id) direction)
+        new-state (add-shot state position direction)]
     {:new-state new-state
      :send-back [:update-shots (:shots new-state)]}))
 
@@ -90,9 +93,18 @@
     (siphon broadcast-channel ch)
     (enqueue ch [:new-world (:walls @world-state)])))
 
+(defn update-shots [{:keys [world-state broadcast-channel] :as server}]
+  (letfn [(update-shot [{[ x  y] :position
+                         [dx dy] :direction}] {:position [(+ x dx) (+ y dy)]
+                                               :direction [dx dy]})]
+    (swap! (:world-state server) assoc-in [:shots] (map update-shot (:shots @world-state)))
+    (enqueue broadcast-channel [:update-shots (:shots @world-state)])))
+
 (defn junehandler [ch info]
-  (let [server (create-server)]
-    (receive ch #(new-client server ch %))))
+  (let [server (create-server)
+        task (proxy [TimerTask] [] (run [] (update-shots server)))]
+  (. (new Timer) (schedule task (long 1000) (long 1000)))
+  (receive ch #(new-client server ch %))))
 
 (defn -main []
   (start-object-server junehandler {:port 5000}))
