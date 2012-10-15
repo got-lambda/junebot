@@ -43,8 +43,6 @@
 
 (defmulti process-message
   (fn [id [message-type]]
-    (prn id)
-    (prn message-type)
     message-type))
 
 (defmethod process-message :fire
@@ -57,7 +55,7 @@
 (defmethod process-message :move
   [id [_ message]]
   (let [movement (get directions message)]
-    (cons :update-players (vals (swap! players move id movement)))))
+    [:update-players (vals (swap! players move id movement))]))
 
 (def broadcast-channel (channel))
 
