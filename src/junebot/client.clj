@@ -45,20 +45,19 @@
       (fill 255 0 0)
       (rect (+ (* size x) (/ size 4)) (+ (* size y) (/ size 4)) (/ size 2) (/ size 2)))))
 
-(defn fire
-  [client]
+(defn fire [client]
   (send-to-server client [:fire]))
 
 (defn move [client dir]
   (send-to-server client [:move dir]))
 
 (defn key-pressed [client]
-  (cond
-   (= (key-code) java.awt.event.KeyEvent/VK_RIGHT) (move client "E")
-   (= (key-code) java.awt.event.KeyEvent/VK_LEFT) (move client "W")
-   (= (key-code) java.awt.event.KeyEvent/VK_UP) (move client "N")
-   (= (key-code) java.awt.event.KeyEvent/VK_DOWN) (move client "S")
-   (= (key-code) java.awt.event.KeyEvent/VK_SPACE) (fire client)))
+  (condp = (key-code)
+    java.awt.event.KeyEvent/VK_RIGHT (move client "E")
+    java.awt.event.KeyEvent/VK_LEFT  (move client "W")
+    java.awt.event.KeyEvent/VK_UP    (move client "N")
+    java.awt.event.KeyEvent/VK_DOWN  (move client "S")
+    java.awt.event.KeyEvent/VK_SPACE (fire client)))
 
 (defn create-client [channel]
   (map->Client {:channel channel

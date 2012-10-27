@@ -35,16 +35,16 @@
                     (assoc :direction movement)))
       state)))
 
-(defmulti process-message
-  (fn [state id [message-type]]
-    message-type))
-
 (defn add-shot
   [{:keys [walls players shots] :as state} position direction]
   (if (free-position? (concat walls (vals players)) position)
     (assoc state :shots (conj shots {:position  position,
                                      :direction direction}))
     state))
+
+(defmulti process-message
+  (fn [state id [message-type]]
+    message-type))
 
 (defmethod process-message :fire
   [{:keys [players] :as state} id _]
@@ -91,7 +91,11 @@
            {:type :client, :name (message :name), :coord [1 1]})
     (map* (partial update-and-send server id) ch)
     (siphon broadcast-channel ch)
-    (enqueue ch [:new-world (:walls @world-state)])))
+    (let [current-world-state @world-state]
+      (enqueue ch
+               [:new-world (:walls current-world-state)]
+               [:update-players (vals (:players current-world-state))]
+               [:update-shots (:shots current-world-state)]))))
 
 (defn update-shots [{:keys [world-state broadcast-channel] :as server}]
   (letfn [(update-shot [{[ x  y] :position
