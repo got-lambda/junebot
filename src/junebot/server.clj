@@ -67,7 +67,7 @@
 (defn create-server []
   (map->Server
    {:broadcast-channel (channel),
-    :world-state (atom {:id-counter 0
+    :world-state (atom {:id-counter 0,
                         :walls (init-walls),
                         :players {},
                         :shots []})}))
@@ -100,11 +100,11 @@
     (swap! (:world-state server) assoc-in [:shots] (map update-shot (:shots @world-state)))
     (enqueue broadcast-channel [:update-shots (:shots @world-state)])))
 
-(defn junehandler [ch info]
-  (let [server (create-server)
-        task (proxy [TimerTask] [] (run [] (update-shots server)))]
-  (. (new Timer) (schedule task (long 1000) (long 1000)))
-  (receive ch #(new-client server ch %))))
+(defn junehandler [server ch info]
+  (receive ch #(new-client server ch %)))
 
 (defn -main []
-  (start-object-server junehandler {:port 5000}))
+  (let [server (create-server)
+        task (proxy [TimerTask] [] (run [] (update-shots server)))]
+    (. (new Timer) (schedule task (long 1000) (long 1000)))
+    (start-object-server (partial junehandler server) {:port 5000})))
