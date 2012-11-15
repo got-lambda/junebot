@@ -7,9 +7,6 @@
 
 (defrecord Client [world-state channel])
 
-(defn send-to-server [client msg]
-  (enqueue @(:channel client) msg))
-
 (defn setup []
   (text-align :center)
   (frame-rate 30))
@@ -45,6 +42,9 @@
       (fill 255 0 0)
       (rect (+ (* size x) (/ size 4)) (+ (* size y) (/ size 4)) (/ size 2) (/ size 2)))))
 
+(defn send-to-server [client msg]
+  (enqueue @(:channel client) msg))
+
 (defn fire [client]
   (send-to-server client [:fire]))
 
@@ -57,7 +57,8 @@
     java.awt.event.KeyEvent/VK_LEFT  (move client "W")
     java.awt.event.KeyEvent/VK_UP    (move client "N")
     java.awt.event.KeyEvent/VK_DOWN  (move client "S")
-    java.awt.event.KeyEvent/VK_SPACE (fire client)))
+    java.awt.event.KeyEvent/VK_SPACE (fire client)
+    nil))
 
 (defn create-client [channel]
   (map->Client {:channel channel
