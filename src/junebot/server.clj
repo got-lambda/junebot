@@ -66,7 +66,7 @@
 
 (defn create-server []
   (map->Server
-   {:broadcast-channel (permanent-channel),
+   {:broadcast-channel (channel),
     :world-state (atom {:id-counter 0,
                         :walls (init-walls),
                         :players {},
@@ -86,7 +86,6 @@
 
 (defn new-client [{:keys [world-state broadcast-channel] :as server} ch message]
   (let [id (swap! world-state update-in [:id-counter] inc)]
-    (println "New client!")
     (on-closed ch (fn [] (swap! world-state update-in [:players] dissoc id)))
     (swap! (:world-state server) assoc-in [:players id]
            {:type :client, :name (message :name), :coord [1 1]})
