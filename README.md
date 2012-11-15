@@ -21,6 +21,8 @@ Distributed under the Eclipse Public License, the same as Clojure.
 ## TODO
 
 ### Server Side
+- Fix terminology for shots (position -> coord)
+- Fix remove dependency of graphics library in server
 - Fix initial world
 - Fix initial player position
 - Fix tests
