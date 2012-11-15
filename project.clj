@@ -4,4 +4,5 @@
                  [aleph "0.3.0-alpha2"]
                  [speclj "2.1.2"]
 		 [quil "1.4.0"]]
+  :test-paths ["spec"]
   :main junebot.client)
