@@ -5,7 +5,7 @@
 
 (describe "get-color-from-name"
 
-  (it "returns a color in RGB"
+  (it "returns a color in RGB based on the given name"
     (should= [170 170 170]
              (get-color-from-name "HaX0R")))
 
@@ -56,7 +56,7 @@
 
 (describe "update-world"
 
-  (with world-state {:walls []  :players []  :shots []})
+  (with world-state {:walls [], :players [], :shots []})
 
   (it "updates walls on :new-world"
     (should= {:walls [1 2 3], :players [], :shots []}
@@ -78,7 +78,6 @@
     (process-message @client [:new-world [1 2 3]])
     (should= {:walls [1 2 3], :players [], :shots []}
              @(:world-state @client)))
-
 
   )
 
