@@ -8,7 +8,7 @@
 (defrecord Client [world-state channel])
 
 (defn send-to-server [client msg]
-  (enqueue @(:channel client) msg))
+  (enqueue (:channel client) msg))
 
 (defn setup []
   (text-align :center)
@@ -27,7 +27,7 @@
 (defn draw [client]
   (background 220 230 240)
   (let [size 20
-        {:keys [walls players shots]} @(:world-state client)]
+        {:keys [walls players shots]} (:world-state client)]
     (doseq [object (concat walls players)]
       (let [[r g b] (get-color-from-name (:name object))
             [x y] (:coord object)
@@ -73,11 +73,17 @@
 (defn process-message [client server-msg]
   (swap! (:world-state client) update-world server-msg))
 
+(defn open-socket [ip port]
+  (if-let [socket (.success-value (object-client {:host ip, :port port}) nil)]
+    socket
+    (do
+      (Thread/sleep 1000)
+      (println "Failed to connect, retry...")
+      (recur ip port))))
+
 (defn -main
   [& [ip, player-name]]
-  (let [client
-        (create-client (object-client {:host (or ip "localhost"), :port 5000}))]
-
+  (let [client (create-client (open-socket (or ip "localhost") 5000))]
     (defsketch junebot
       :title "Junebot"
       :setup setup
@@ -85,4 +91,4 @@
       :key-pressed (partial key-pressed client)
       :size [1000 600])
     (send-to-server client {:name (or player-name (JOptionPane/showInputDialog "Please enter yourname"))})
-    (map* (partial process-message client) @(:channel client))))
+    (map* (partial process-message client) (:channel client))))
